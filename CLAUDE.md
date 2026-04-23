@@ -86,6 +86,30 @@ fun findUser(id: UserId): User? = ...
 // TODO: 나중에 캐시 추가
 ```
 
+## 작업 피드백 루프
+
+작업 단위(feature / fix / refactor) 하나당 다음 사이클을 돌린다. **작게 자주**.
+
+1. **구현** — 동작하는 코드 먼저. 이 단계는 정확성 우선.
+2. **자가 리뷰** — `/self-review` 로 CLAUDE.md 규칙 전반(Reactive / WebSocket / 주석 / 테스트 / 패키지 구조 / 빌드 hygiene)을 점검. 결과는 `Critical` / `Warning` / `Nit` 로 분류된 punch list.
+3. **선별**
+   - **Critical**: 반드시 수정.
+   - **Warning**: 원칙적으로 수정. 유예 사유가 명확하면 `TODO(ADR-NNNN)` 로 명시하고 ADR 작성.
+   - **Nit**: 같은 커밋 범위에서만 해결. 분리 필요하면 건너뛴다.
+4. **리팩토링** — 동작 유지, 구조만 변경. 기능 추가와 **섞지 않고 별도 커밋**.
+5. **검증** — `./gradlew test` 통과. Reactive 수정이면 `/self-review` 2차 확인 (회귀 방지).
+6. **커밋** — 커밋 가이드라인대로. 기능 / 리팩토링 / 테스트 / 문서는 **각각 커밋 분리**.
+7. **회고** — 이 루프에서 반복해 잡은 이슈가 있거나, 리뷰가 놓친 실수가 있었다면 `/skill-tune` 으로 스킬 혹은 이 문서를 보강.
+
+### 스킬 관리 원칙
+
+`.claude/skills/` 는 팀(현재 1인) 지식의 실행 가능 버전. 시간에 따라 보강한다.
+
+- **추가**: 두 번 이상 반복한 흐름, 또는 두 번 이상 놓친 이슈 유형일 때만. 일회성에는 만들지 않는다.
+- **업데이트**: 기존 스킬이 놓친 케이스가 발견되면 해당 스킬 체크리스트에 한 줄 추가. 프롬프트는 짧게, 규칙은 bullet로.
+- **폐기**: 스택 변경·패턴 폐기로 더 이상 적용되지 않는 스킬은 삭제. 남기면 잘못된 컨텍스트가 주입된다.
+- **변경은 별도 커밋** — 스킬만 바뀔 때 `chore(skills): ...`, 규칙 문서만 바뀔 때 `docs: ...`. 둘을 섞지 않는다.
+
 ## 의사결정 로그 (ADR)
 
 비자명한 기술/설계 결정은 `docs/adr/` 에 Architecture Decision Record로 남긴다.
@@ -154,6 +178,8 @@ Refs: docs/adr/0003-direct-message-model.md
 
 ## 커스텀 skill
 
-- `/reactive-review` — 변경된 Kotlin 파일에서 블로킹 호출·세션 누수 등 reactive 안티패턴을 점검.
+- `/self-review` — 변경된 파일 전체를 CLAUDE.md 규칙 기준으로 자가 리뷰하고 `Critical`/`Warning`/`Nit` punch list 출력 (수정 없음). 작업 피드백 루프의 기본 진입점.
+- `/reactive-review` — 변경된 Kotlin 파일에서 블로킹 호출·세션 누수 등 reactive 안티패턴만 집중 점검 (`/self-review`의 부분 집합; 독립 호출이 필요할 때만).
 - `/chat-feature <name>` — WebSocket handler + service + DTO + 테스트 스켈레톤 생성.
 - `/decision-log <title>` — `docs/adr/` 에 새 ADR 파일을 다음 순번으로 생성.
+- `/skill-tune` — 반복 이슈를 기존 스킬 체크리스트·CLAUDE.md 규칙·새 스킬로 환원 (메타 스킬).
