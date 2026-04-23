@@ -2,7 +2,7 @@
 
 실시간 채팅 서비스. **Spring Boot 3 + Kotlin + JDK 21 + WebFlux + Coroutines + WebSocket**.
 
-영속 계층(R2DBC / MongoDB Reactive / Redis 등) 및 base package는 아직 미정 — 확정 시 이 문서를 갱신한다.
+Base package: `io.ripple.chat`. 영속 계층(R2DBC / MongoDB Reactive / Redis 등)은 아직 미정 — 확정 시 이 문서를 갱신한다.
 
 ## Reactive / Coroutine 규칙 (strict)
 
@@ -51,7 +51,7 @@
 ## 패키지 구조 (제안)
 
 ```
-src/main/kotlin/<base>/
+src/main/kotlin/io/ripple/chat/
   config/     # @Configuration, WebSocket/Router 매핑
   handler/    # WebSocketHandler, HandlerFunction
   service/    # suspend / reactive 비즈니스 로직
