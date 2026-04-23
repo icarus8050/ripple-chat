@@ -70,6 +70,61 @@ src/main/kotlin/<base>/
 
 상세 형식·분류 기준은 `docs/adr/README.md`.
 
+## 커밋 가이드라인
+
+**메시지 형식** — Conventional Commits
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+- **type**: `feat` | `fix` | `refactor` | `test` | `docs` | `chore` | `perf` | `build` | `ci`
+- **scope** (선택): 영향 영역 — `handler`, `service`, `config`, `dto`, `ws`, `build`, `adr` 등
+- **subject**: 70자 이내, 동사로 시작. 한국어/영어는 한 프로젝트 안에서 일관되게. 마침표 없음.
+  - OK: `feat(handler): DM WebSocket 핸들러 추가`
+  - OK: `fix(service): 세션 종료 시 sink 구독 누수 수정`
+  - NG: `DM 기능`, `버그 수정`, `WIP`
+
+**본문 (body)**
+
+- subject만으로 불충분할 때만 작성. **why**에 집중 — **what**은 diff로 확인 가능.
+- 72자 랩, subject와 빈 줄로 구분.
+- 관련 ADR이 있으면 footer에 `Refs: docs/adr/NNNN-<slug>.md` 로 참조.
+
+**커밋 단위**
+
+- 하나의 논리적 변경 = 하나의 커밋. 리팩토링과 기능 추가를 한 커밋에 섞지 않는다.
+- 각 커밋은 독립적으로 빌드·테스트가 통과하는 상태여야 한다.
+- 메시지로 설명하기 어려우면 단위를 쪼개는 신호다.
+
+**금지**
+
+- 이미 원격에 푸시된 커밋에 `--amend` / `rebase` 금지 (본인 feature 브랜치 제외).
+- `--no-verify`로 훅 우회 금지. 훅 실패 시 원인을 고치고 새 커밋을 만든다 (amend 금지 — 훅 실패는 커밋이 안 된 상태).
+- `main`에 WIP 커밋 금지. feature 브랜치에서만 허용하고 merge 전 squash.
+- `git add -A` / `git add .` 기본 금지. `.env`, 시크릿, 대용량 바이너리 실수 방지를 위해 파일을 명시적으로 지정.
+
+**커밋 전 체크리스트**
+
+- `./gradlew test` 통과.
+- 변경 범위에 Kotlin 파일이 있으면 `/reactive-review` 실행.
+- 비자명한 결정이 포함됐다면 `/decision-log <title>` 로 ADR을 먼저 남기고, 커밋 footer에서 참조.
+
+**예시**
+
+```
+feat(handler): DM WebSocket 핸들러 추가
+
+1:1 메시지 송수신 플로우 구현. 세션 종료 시 공유 sink에서
+구독을 제거해 누수를 방지.
+
+Refs: docs/adr/0003-direct-message-model.md
+```
+
 ## 커스텀 skill
 
 - `/reactive-review` — 변경된 Kotlin 파일에서 블로킹 호출·세션 누수 등 reactive 안티패턴을 점검.
